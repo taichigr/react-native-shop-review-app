@@ -19,9 +19,11 @@ import {
   query,
   orderBy,
   setDoc,
+  addDoc,
 } from "firebase/firestore";
 import { Shop } from "../types/shop";
 import { initialUser, User } from "../types/user";
+import { Review } from "../types/review";
 // import {...} from "firebase/firestore";
 // import {...} from "firebase/functions";
 // import {...} from "firebase/storage";
@@ -42,7 +44,9 @@ export const getShops = async () => {
   const shopsRef = collection(db, "shops");
   const q = query(shopsRef, orderBy("score", "desc"));
   const querySnapshot = await getDocs(q);
-  const shops = querySnapshot.docs.map((doc) => doc.data() as Shop);
+  const shops = querySnapshot.docs.map(
+    (doc) => ({ ...doc.data(), id: doc.id }) as Shop,
+  );
 
   return shops;
 };
@@ -83,4 +87,10 @@ export const signin = async () => {
 export const updateUser = async (userId: any, params: any) => {
   const userRef = doc(db, "users", userId);
   await setDoc(userRef, params, { merge: true });
+};
+
+export const addReview = async (shopId: any, review: Review) => {
+  const shopRef = doc(db, "shops", shopId);
+  const reviewRef = collection(shopRef, "reviews");
+  await addDoc(reviewRef, review);
 };
